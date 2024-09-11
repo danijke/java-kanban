@@ -1,15 +1,14 @@
 package model;
 
-import service.*;
+import service.TaskStatus;
 
 import java.util.Objects;
 
 public class Task {
     private final String title;
     private final String description;
-    private int id;
     protected TaskStatus status;
-
+    private int id;
 
     public Task(String title, String description) {
         this.title = title;
@@ -48,12 +47,6 @@ public class Task {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{" +
-                "Имя ='" + this.title + '\'' +
-                ",Описание ='" + this.description + '\'' +
-                ",id ='" + this.id + '\'' +
-                ",статус ='" + this.status + '\'' + '}';
-
+        return getClass().getSimpleName() + "{" + "Имя ='" + this.title + '\'' + ",Описание ='" + this.description + '\'' + ",id ='" + this.id + '\'' + ",статус ='" + this.status + '\'' + '}';
     }
-
 }
