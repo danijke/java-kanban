@@ -1,18 +1,17 @@
 import model.*;
 import service.*;
-
-import java.util.HashMap;
+import java.util.ArrayList;
 
 public class Main {
 
     public static void main(String[] args) {
         TaskManager taskManager = new TaskManager();
 
-        DefaultTask defaultTask1 = new DefaultTask("Вебинары", "Посмотреть вебинары 3-4 спринта");
-        taskManager.addTask(defaultTask1);
+        Task task1 = new Task("Вебинары", "Посмотреть вебинары 3-4 спринта");
+        taskManager.addTask(task1);
 
-        DefaultTask defaultTask2 = new DefaultTask("Push", "Придумать название для push");
-        taskManager.addTask(defaultTask2);
+        Task task2 = new Task("Push", "Придумать название для push");
+        taskManager.addTask(task2);
 
         Epic epic1 = new Epic("1-й модуль", "Завершить первый модуль до 16-го сентября");
         taskManager.addTask(epic1);
@@ -31,8 +30,8 @@ public class Main {
 
         printTasks(taskManager.getAllTasks());
 
-        defaultTask1.setStatus(TaskStatus.IN_PROGRESS);
-        taskManager.updateTask(defaultTask1);
+        task1.setStatus(TaskStatus.IN_PROGRESS);
+        taskManager.updateTask(task1);
 
         subtask2.setStatus(TaskStatus.IN_PROGRESS);
         taskManager.updateTask(subtask2);
@@ -42,20 +41,16 @@ public class Main {
 
         printTasks(taskManager.getAllTasks());
 
-        taskManager.removeById(defaultTask2.getId());
-        taskManager.removeById(subtask1.getId());
+        taskManager.removeTaskById(task2.getId());
+        taskManager.removeSubtaskById(subtask1.getId());
 
         printTasks(taskManager.getAllTasks());
 
     }
 
-    private static void printTasks(HashMap<Integer, Task> allTasks) {
+    private static void printTasks(ArrayList<Task> allTasks) {
         System.out.println("Список задач: ");
-        for (Task task : allTasks.values()) {
-            System.out.println(task);
-        }
+        System.out.println(allTasks);
     }
-
-
 }
 

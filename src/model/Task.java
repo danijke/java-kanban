@@ -1,24 +1,28 @@
 package model;
+
 import service.*;
+
 import java.util.Objects;
 
-public abstract class Task {
-    private static int counter = 0;
+public class Task {
     private final String title;
     private final String description;
-    private final int id;
+    private int id;
     protected TaskStatus status;
 
 
     public Task(String title, String description) {
         this.title = title;
         this.description = description;
-        this.id = ++counter;
         this.status = TaskStatus.NEW;
     }
 
     public int getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public TaskStatus getStatus() {
@@ -41,13 +45,14 @@ public abstract class Task {
     public int hashCode() {
         return Objects.hash(title, description, id, status);
     }
+
     @Override
     public String toString() {
-        return getClass().getSimpleName()+ "{" +
-                "Имя ='" + title + '\'' +
-                ",Описание ='" + description + '\'' +
-                ",id ='" + id + '\'' +
-                ",статус ='" + status + '\'' + '}';
+        return getClass().getSimpleName() + "{" +
+                "Имя ='" + this.title + '\'' +
+                ",Описание ='" + this.description + '\'' +
+                ",id ='" + this.id + '\'' +
+                ",статус ='" + this.status + '\'' + '}';
 
     }
 
