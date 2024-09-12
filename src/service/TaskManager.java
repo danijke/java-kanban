@@ -1,15 +1,14 @@
 package service;
 
 import model.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class TaskManager {
-    private static int counter = 0;
     private final HashMap<Integer, Task> tasks = new HashMap<>();
     private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
     private final HashMap<Integer, Epic> epicTasks = new HashMap<>();
+    private int counter = 0;
 
     public Task getTaskById(int id) {
         return tasks.get(id);
@@ -54,18 +53,16 @@ public class TaskManager {
         tasks.put(id, task);
     }
 
-    public void addTask(Epic task) {
+    public void addEpic(Epic task) {
         int id = generateId(task);
         epicTasks.put(id, task);
     }
 
-    public void addTask(Subtask task, Epic epic) {
+    public void addSubtask(Subtask task) {
         int id = generateId(task);
-        int epicId = epic.getId();
-        task.setEpicId(epic.getId());
         subtasks.put(id, task);
         if (task.getStatus() != TaskStatus.NEW) {
-            setEpicStatus(epicId);
+            setEpicStatus(task.getEpicId());
         }
     }
 
@@ -75,13 +72,13 @@ public class TaskManager {
         tasks.put(id, task);
     }
 
-    public void updateTask(Epic task) {
+    public void updateEpic(Epic task) {
         int id = task.getId();
         epicTasks.remove(id);
         epicTasks.put(id, task);
     }
 
-    public void updateTask(Subtask task) {
+    public void updateSubtask(Subtask task) {
         int id = task.getId();
         subtasks.remove(id);
         subtasks.put(id, task);

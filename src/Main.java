@@ -13,19 +13,19 @@ public class Main {
         taskManager.addTask(task2);
 
         Epic epic1 = new Epic("1-й модуль", "Завершить первый модуль до 16-го сентября");
-        taskManager.addTask(epic1);
+        taskManager.addEpic(epic1);
 
-        Subtask subtask1 = new Subtask("4-спринт", "Сдать финальное тз 4-го спринта");
-        taskManager.addTask(subtask1, epic1);
+        Subtask subtask1 = new Subtask("4-спринт", "Сдать финальное тз 4-го спринта", epic1.getId());
+        taskManager.addSubtask(subtask1);
 
-        Subtask subtask2 = new Subtask("5-спринт", "Успеть пройти 5-й спринт до конца модуля");
-        taskManager.addTask(subtask2, epic1);
+        Subtask subtask2 = new Subtask("5-спринт", "Успеть пройти 5-й спринт до конца модуля", epic1.getId());
+        taskManager.addSubtask(subtask2);
 
         Epic epic2 = new Epic("Оплата", "Оплатить следующий модуль");
-        taskManager.addTask(epic2);
+        taskManager.addEpic(epic2);
 
-        Subtask subtask3 = new Subtask("Работа", "Найти работу для оплаты учебы");
-        taskManager.addTask(subtask3, epic2);
+        Subtask subtask3 = new Subtask("Работа", "Найти работу для оплаты учебы", epic2.getId());
+        taskManager.addSubtask(subtask3);
 
         printTasks(taskManager);
 
@@ -33,10 +33,10 @@ public class Main {
         taskManager.updateTask(task1);
 
         subtask2.setStatus(TaskStatus.IN_PROGRESS);
-        taskManager.updateTask(subtask2);
+        taskManager.updateSubtask(subtask2);
 
         subtask3.setStatus(TaskStatus.DONE);
-        taskManager.updateTask(subtask3);
+        taskManager.updateSubtask(subtask3);
 
         printTasks(taskManager);
 
