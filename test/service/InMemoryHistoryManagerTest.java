@@ -2,7 +2,9 @@ package service;
 
 import model.*;
 import org.junit.jupiter.api.*;
+
 import java.util.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("История просмотров")
@@ -44,5 +46,7 @@ class InMemoryHistoryManagerTest {
         assertEquals(List.of(subtask), historyManager.getHistory());
         historyManager.remove(subtask.getId());
         assertEquals(List.of(), historyManager.getHistory());
+        historyManager.add(task);
+        assertEquals(List.of(task), historyManager.getHistory());
     }
 }
