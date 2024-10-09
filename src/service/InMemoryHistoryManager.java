@@ -2,14 +2,12 @@ package service;
 
 import model.Task;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    private final Node head = new Node(null, null, null);
-    private final Node tail = new Node(head, null, null);
     HashMap<Integer, Node> historyMap = new HashMap<>();
+    private Node head;
+    private Node tail;
 
     @Override
     public List<Task> getHistory() {
@@ -36,8 +34,8 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     private List<Task> getTasks() {
         List<Task> historyList = new ArrayList<>();
-        Node currentNode = head.next;
-        while (currentNode.data != null) {
+        Node currentNode = head;
+        while (currentNode != null) {
             historyList.add(currentNode.data);
             currentNode = currentNode.next;
 
@@ -46,14 +44,40 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     private Node linkLast(Task task) {
-        Node newNode = new Node(tail.prev, task, tail);
-        tail.prev.next = newNode;
-        tail.prev = newNode;
+        Node oldTail = tail;
+        Node newNode = new Node(oldTail, task, null);
+        tail = newNode;
+        if (oldTail == null) {
+            head = newNode;
+        } else {
+            oldTail.next = newNode;
+        }
         return newNode;
     }
 
     private void removeNode(Node node) {
-        node.prev.next = node.next;
-        node.next.prev = node.prev;
+        if (node.prev == null) {
+            head = node.next;
+        } else {
+            node.prev.next = node.next;
+        }
+
+        if (node.next == null) {
+            tail = node.prev;
+        } else {
+            node.next.prev = node.prev;
+        }
+    }
+}
+
+class Node {
+    public Task data;
+    public Node prev;
+    public Node next;
+
+    public Node(Node prev, Task data, Node next) {
+        this.data = data;
+        this.prev = prev;
+        this.next = next;
     }
 }
