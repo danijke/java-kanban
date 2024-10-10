@@ -15,7 +15,7 @@ class ManagersTest {
 
 
     @Test
-    @DisplayName("должен возвращать проинициализировнный объект InMemoryTaskManager")
+    @DisplayName("должен возвращать проинициализированный объект InMemoryTaskManager")
     void shouldGetDefault() {
         Task task = new Task("taskTitle", "taskD");
         taskManager = Managers.getDefault();
@@ -25,7 +25,7 @@ class ManagersTest {
     }
 
     @Test
-    @DisplayName("должен возвращать проинициализировнный объект InMemoryHistoryManager")
+    @DisplayName("должен возвращать проинициализированный объект InMemoryHistoryManager")
     void getDefaultHistory() {
         Task task = new Task("taskTitle", "taskD");
         historyManager = Managers.getDefaultHistory();

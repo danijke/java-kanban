@@ -2,8 +2,6 @@ package model;
 
 import service.TaskStatus;
 
-import java.util.Objects;
-
 public class Task {
     private final String title;
     private final String description;

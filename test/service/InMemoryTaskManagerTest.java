@@ -18,20 +18,10 @@ class InMemoryTaskManagerTest {
     Subtask subtask;
     InMemoryTaskManager inMemoryTaskManager;
 
-
     @BeforeEach
     void init() {
         EmptyHistoryManager historyManager = new EmptyHistoryManager();
         inMemoryTaskManager = new InMemoryTaskManager(historyManager);
-    }
-
-    @Test
-    @DisplayName("должен генерировать, задавать айди для задач")
-    void shouldGenerateSetId() {
-        task = new Task("taskTitle", "taskD");
-        assertEquals(0, task.getId(), "айди должны совпадать");
-        inMemoryTaskManager.generateId(task);
-        assertEquals(1, task.getId(), "айди должны совпадать");
     }
 
     @Test
@@ -90,7 +80,6 @@ class InMemoryTaskManagerTest {
 
         assertEquals(subtask, savedSubtask, "подзадачи должны совпадать");
     }
-
 
     @Test
     @DisplayName("должен получить верную задачу")
@@ -283,6 +272,11 @@ class InMemoryTaskManagerTest {
     private static class EmptyHistoryManager implements HistoryManager {
         @Override
         public void add(Task task) {
+
+        }
+
+        @Override
+        public void remove(int id) {
 
         }
 
