@@ -1,11 +1,7 @@
 package service;
 
-import model.Epic;
-import model.Subtask;
-import model.Task;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import model.*;
+import org.junit.jupiter.api.*;
 
 import java.util.List;
 
@@ -28,16 +24,17 @@ class InMemoryTaskManagerTest {
     @DisplayName("должен вычислять статус эпика по подзадачам")
     void shouldCalculateEpicStatus() {
         epic = new Epic("epicTitle", "epicD");
-        int epicId = inMemoryTaskManager.generateId(epic);
+        inMemoryTaskManager.generateId(epic);
+        int epicId = epic.getId();
         inMemoryTaskManager.epicTasks.put(epicId, epic);
 
         subtask = new Subtask("subtaskTitle", "subtaskD", epic.getId());
-        int subtaskId = inMemoryTaskManager.generateId(subtask);
-        inMemoryTaskManager.subtasks.put(subtaskId, subtask);
+        inMemoryTaskManager.generateId(subtask);
+        inMemoryTaskManager.subtasks.put(subtask.getId(), subtask);
 
         Subtask anotherSubtask = new Subtask("subtaskTitle2", "subtaskD2", epic.getId());
-        int anotherSubtaskId = inMemoryTaskManager.generateId(anotherSubtask);
-        inMemoryTaskManager.subtasks.put(anotherSubtaskId, anotherSubtask);
+        inMemoryTaskManager.generateId(anotherSubtask);
+        inMemoryTaskManager.subtasks.put(anotherSubtask.getId(), anotherSubtask);
 
         inMemoryTaskManager.calculateEpicStatus(epicId);
         assertEquals(TaskStatus.NEW, epic.getStatus(), "статусы должны совпадать");

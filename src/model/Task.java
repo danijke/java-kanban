@@ -1,6 +1,8 @@
 package model;
 
-import service.TaskStatus;
+import service.TaskManager;
+
+import java.io.IOException;
 
 public class Task {
     private final String title;
@@ -14,16 +16,29 @@ public class Task {
         this.status = TaskStatus.NEW;
     }
 
+    protected Task(int id, String title, TaskStatus status, String description) {
+        this.id = id;
+        this.title = title;
+        this.status = status;
+        this.description = description;
+    }
+
+
+
     public int getId() {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public TaskStatus getStatus() {
         return status;
+    }
+
+    public Integer getEpicId() {
+        return null;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public void setStatus(TaskStatus status) {
@@ -45,9 +60,32 @@ public class Task {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{" + "Имя ='" + this.title + '\''
-                                        + ",Описание ='" + this.description + '\''
-                                        + ",id ='" + this.id + '\''
-                                        + ",статус ='" + this.status + '\'' + '}';
+        return String.format("%s,%s,%s,%s,%s,%s;%n",
+                this.id,
+                this.getClass().getSimpleName(),
+                this.title,
+                this.status,
+                this.description,
+                this.getEpicId());
+    }
+
+    public static void fromString(String s, TaskManager fileManager) throws IOException{
+        String[] data = s.split(",");
+        switch (data[1]) {
+            case "Task" -> {
+                Task task = new Task(Integer.parseInt(data[0]), data[2], TaskStatus.toStatus(data[3]), data[4]);
+                fileManager.addTask(task);
+            }
+            case "Epic" -> {
+                Epic epic = new Epic(Integer.parseInt(data[0]), data[2], TaskStatus.toStatus(data[3]), data[4]);
+                fileManager.addEpic(epic);
+            }
+            case "Subtask" -> {
+                Subtask subtask = new Subtask(Integer.parseInt(data[0]), data[2], TaskStatus.toStatus(data[3]),
+                        data[4], Integer.parseInt(data[5]));
+                fileManager.addSubtask(subtask);
+            }
+            default -> throw new IOException("не удалось прочитать файл");
+        }
     }
 }
