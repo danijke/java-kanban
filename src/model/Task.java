@@ -3,14 +3,26 @@ package model;
 import service.TaskManager;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class Task {
     private final String title;
     private final String description;
     private TaskStatus status;
     private int id;
+    protected Duration duration;
+    protected LocalDateTime startTime;
 
-    public Task(String title, String description) {
+    public Task(String title, String description, long duration) {
+        this.title = title;
+        this.description = description;
+        this.status = TaskStatus.NEW;
+        this.duration = Duration.ofMinutes(duration);
+        this.startTime = LocalDateTime.now();
+    }
+
+    protected Task(String title, String description) {
         this.title = title;
         this.description = description;
         this.status = TaskStatus.NEW;
@@ -60,6 +72,14 @@ public class Task {
 
     public Integer getEpicId() {
         return null;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return startTime.plus(duration);
     }
 
     @Override
