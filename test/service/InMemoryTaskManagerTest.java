@@ -112,9 +112,10 @@ class InMemoryTaskManagerTest {
     void shouldGetEpicSubtasks() {
         epic = new Epic("epicTitle", "epicD");
         inMemoryTaskManager.addEpic(epic);
-        subtask = new Subtask("subtaskTitle", "subtaskD", epic.getId());
+        int id = epic.getId();
+        subtask = new Subtask("subtaskTitle", "subtaskD", id);
         inMemoryTaskManager.addSubtask(subtask);
-        assertEquals(List.of(subtask), inMemoryTaskManager.getEpicSubtasks(epic), "Списки должны совпадать");
+        assertEquals(List.of(subtask), inMemoryTaskManager.getEpicSubtasks(id), "Списки должны совпадать");
     }
 
     @Test
@@ -241,13 +242,14 @@ class InMemoryTaskManagerTest {
     void shouldRemoveEpic() {
         epic = new Epic("epicTitle", "epicD");
         inMemoryTaskManager.addEpic(epic);
-        subtask = new Subtask("subtaskTitle", "subtaskD", epic.getId());
+        int id = epic.getId();
+        subtask = new Subtask("subtaskTitle", "subtaskD", id);
         inMemoryTaskManager.addSubtask(subtask);
-        assertNotNull(inMemoryTaskManager.getEpic(epic.getId()), "не должен быть null");
-        assertNotNull(inMemoryTaskManager.getEpicSubtasks(epic), "не должен быть null");
-        inMemoryTaskManager.removeEpic(epic.getId());
-        assertNull(inMemoryTaskManager.getEpic(epic.getId()), "должен быть null");
-        assertNull(inMemoryTaskManager.getEpicSubtasks(epic), "должен быть null");
+        assertNotNull(inMemoryTaskManager.getEpic(id), "не должен быть null");
+        assertNotNull(inMemoryTaskManager.getEpicSubtasks(id), "не должен быть null");
+        inMemoryTaskManager.removeEpic(id);
+        assertNull(inMemoryTaskManager.getEpic(id), "должен быть null");
+        assertNull(inMemoryTaskManager.getEpicSubtasks(id), "должен быть null");
     }
 
     @Test

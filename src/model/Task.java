@@ -5,6 +5,7 @@ import service.TaskManager;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 
 public class Task {
     private final String title;
@@ -14,12 +15,12 @@ public class Task {
     protected Duration duration;
     protected LocalDateTime startTime;
 
-    public Task(String title, String description, long duration) {
+    public Task(String title, String description, LocalDateTime startTime, Duration duration) {
         this.title = title;
         this.description = description;
         this.status = TaskStatus.NEW;
-        this.duration = Duration.ofMinutes(duration);
-        this.startTime = LocalDateTime.now();
+        this.startTime = startTime;
+        this.duration = duration;
     }
 
     protected Task(String title, String description) {
@@ -28,11 +29,13 @@ public class Task {
         this.status = TaskStatus.NEW;
     }
 
-    protected Task(int id, String title, TaskStatus status, String description) {
+    protected Task(int id, String title, TaskStatus status, String description, LocalDateTime startTime, Duration duration) {
         this.id = id;
         this.title = title;
         this.status = status;
         this.description = description;
+        this.startTime = startTime;
+        this.duration = duration;
     }
 
     public static void fromString(String s, TaskManager fileManager) throws IOException {
@@ -99,4 +102,23 @@ public class Task {
     public String toString() {
         return String.format("%s,%s,%s,%s,%s,%s;%n", this.id, this.getClass().getSimpleName(), this.title, this.status, this.description, this.getEpicId());
     }
+
+    public static Comparator<Task> getComparator() {
+        return Comparator.comparing(Task::getStartTime);
+    }
 }
+
+//todo добавить в методы добавления, удаления, изменения запись в tresets --
+//todo доработать обновление времени и продолжительности эпика относительно подзадач--
+//todo доработать опцию сохранения состояния в файл
+//todo добавить в тесты проверку новых полей
+//todo поменять циклы на stream api ~
+//todo
+//todo
+//todo
+//todo
+//todo
+//todo
+//todo
+//todo
+//todo

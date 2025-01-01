@@ -13,7 +13,7 @@ public interface TaskManager {
 
     Subtask getSubtask(int id);
 
-    List<Subtask> getEpicSubtasks(Epic epic);
+    List<Subtask> getEpicSubtasks(int id);
 
     List<Task> getTasks();
 

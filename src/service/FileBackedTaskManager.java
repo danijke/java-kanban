@@ -110,7 +110,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             if (Files.notExists(path)) {
                 throw new IOException("файл не найден. ");
             }
-            List<Task> allTasks = getAllTasks();
+            List<Task> allTasks = getSortedTasks();
             bw.write("id,type,name,status,description,epic\n");
             for (Task task : allTasks) {
                 bw.write(task.toString());
