@@ -10,10 +10,10 @@ import java.util.Comparator;
 public class Task {
     private final String title;
     private final String description;
-    private TaskStatus status;
-    private int id;
     protected Duration duration;
     protected LocalDateTime startTime;
+    private TaskStatus status;
+    private int id;
 
     public Task(String title, String description, LocalDateTime startTime, Duration duration) {
         this.title = title;
@@ -55,6 +55,10 @@ public class Task {
             }
             default -> throw new IOException("не удалось прочитать файл");
         }
+    }
+
+    public static Comparator<Task> getComparator() {
+        return Comparator.comparing(Task::getStartTime);
     }
 
     public int getId() {
@@ -100,11 +104,9 @@ public class Task {
 
     @Override
     public String toString() {
-        return String.format("%s,%s,%s,%s,%s,%s;%n", this.id, this.getClass().getSimpleName(), this.title, this.status, this.description, this.getEpicId());
-    }
-
-    public static Comparator<Task> getComparator() {
-        return Comparator.comparing(Task::getStartTime);
+        return String.format("%s,%s,%s,%s,%s,%d,%s,%d;%n", this.id, this.getClass().getSimpleName(), this.title,
+                this.status, this.description, this.getEpicId(),
+                this.startTime.toString(), this.duration.toMinutes());
     }
 }
 
