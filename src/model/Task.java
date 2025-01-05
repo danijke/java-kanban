@@ -38,28 +38,9 @@ public class Task {
         this.duration = duration;
     }
 
-    public static void fromString(String s, TaskManager fileManager) throws IOException {
-        String[] data = s.split(",");
-        switch (data[1]) {
-            case "Task" -> {
-                Task task = new Task(Integer.parseInt(data[0]), data[2], TaskStatus.toStatus(data[3]), data[4]);
-                fileManager.addTask(task);
-            }
-            case "Epic" -> {
-                Epic epic = new Epic(Integer.parseInt(data[0]), data[2], TaskStatus.toStatus(data[3]), data[4]);
-                fileManager.addEpic(epic);
-            }
-            case "Subtask" -> {
-                Subtask subtask = new Subtask(Integer.parseInt(data[0]), data[2], TaskStatus.toStatus(data[3]), data[4], Integer.parseInt(data[5]));
-                fileManager.addSubtask(subtask);
-            }
-            default -> throw new IOException("не удалось прочитать файл");
-        }
-    }
 
-    public static Comparator<Task> getComparator() {
-        return Comparator.comparing(Task::getStartTime);
-    }
+
+
 
     public int getId() {
         return id;
@@ -108,11 +89,40 @@ public class Task {
                 this.status, this.description, this.getEpicId(),
                 this.startTime.toString(), this.duration.toMinutes());
     }
+
+    public static Comparator<Task> getComparator() {
+        return Comparator.comparing(Task::getStartTime);
+    }
+    public static void fromString(String s, TaskManager fileManager) throws IOException {
+        String[] data = s.split(",");
+        switch (data[1]) {
+            case "Task" -> {
+                Task task = new Task(Integer.parseInt(data[0]), data[2],
+                        TaskStatus.toStatus(data[3]), data[4], LocalDateTime.parse(data[6]),
+                        Duration.ofMinutes(Integer.parseInt(data[7])));
+                fileManager.addTask(task);
+            }
+            case "Epic" -> {
+                Epic epic = new Epic(Integer.parseInt(data[0]), data[2],
+                        TaskStatus.toStatus(data[3]), data[4], LocalDateTime.parse(data[6]),
+                        Duration.ofMinutes(Integer.parseInt(data[7])));
+                fileManager.addEpic(epic);
+            }
+            case "Subtask" -> {
+                Subtask subtask = new Subtask(Integer.parseInt(data[0]), data[2],
+                        TaskStatus.toStatus(data[3]), data[4], Integer.parseInt(data[5]),
+                        LocalDateTime.parse(data[6]),
+                        Duration.ofMinutes(Integer.parseInt(data[7])));
+                fileManager.addSubtask(subtask);
+            }
+            default -> throw new IOException("не удалось прочитать файл");
+        }
+    }
 }
 
-//todo добавить в методы добавления, удаления, изменения запись в tresets --
-//todo доработать обновление времени и продолжительности эпика относительно подзадач--
-//todo доработать опцию сохранения состояния в файл
+//todo добавить в методы добавления, удаления, изменения запись в tresets -
+//todo доработать обновление времени и продолжительности эпика относительно подзадач-
+//todo доработать опцию сохранения состояния в файл -
 //todo добавить в тесты проверку новых полей
 //todo поменять циклы на stream api ~
 //todo

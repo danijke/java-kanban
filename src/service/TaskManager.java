@@ -7,6 +7,7 @@ import model.Task;
 import java.util.List;
 
 public interface TaskManager {
+    List<Task> getPrioritizedTasks();
     Task getTask(int id);
 
     Epic getEpic(int id);
