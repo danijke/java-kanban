@@ -1,12 +1,11 @@
 package model;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.time.*;
+import java.util.TreeSet;
 
 public class Epic extends Task {
     private LocalDateTime endTime;
-    private TreeSet<Subtask> subtasks = new TreeSet<>(Task.getComparator());
+    private final TreeSet<Subtask> subtasks = new TreeSet<>(Task.getComparator());
 
     public Epic(String title, String description) {
         super(title, description);
@@ -31,6 +30,7 @@ public class Epic extends Task {
         subtasks.add(newTask);
         calculateEpicTime();
     }
+
     public void removeSubtask(Subtask task) {
         subtasks.remove(task);
         calculateEpicTime();
@@ -45,16 +45,13 @@ public class Epic extends Task {
         if (!subtasks.isEmpty()) {
             this.startTime = subtasks.first().getStartTime();
             this.endTime = subtasks.last().getEndTime();
-            this.duration = subtasks.stream()
-                                    .map(Subtask::getDuration)
-                                    .reduce(Duration.ZERO, Duration::plus);
+            this.duration = subtasks.stream().map(Subtask::getDuration).reduce(Duration.ZERO, Duration::plus);
         } else {
             this.startTime = null;
             this.endTime = null;
             this.duration = Duration.ZERO;
         }
     }
-
 
 
 }

@@ -3,8 +3,7 @@ package model;
 import service.TaskManager;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.Comparator;
 
 public class Task {
@@ -38,9 +37,28 @@ public class Task {
         this.duration = duration;
     }
 
+    public static Comparator<Task> getComparator() {
+        return Comparator.comparing(Task::getStartTime);
+    }
 
-
-
+    public static void fromString(String s, TaskManager fileManager) throws IOException {
+        String[] data = s.split(",");
+        switch (data[1]) {
+            case "Task" -> {
+                Task task = new Task(Integer.parseInt(data[0]), data[2], TaskStatus.toStatus(data[3]), data[4], LocalDateTime.parse(data[6]), Duration.ofMinutes(Integer.parseInt(data[7])));
+                fileManager.addTask(task);
+            }
+            case "Epic" -> {
+                Epic epic = new Epic(Integer.parseInt(data[0]), data[2], TaskStatus.toStatus(data[3]), data[4], LocalDateTime.parse(data[6]), Duration.ofMinutes(Integer.parseInt(data[7])));
+                fileManager.addEpic(epic);
+            }
+            case "Subtask" -> {
+                Subtask subtask = new Subtask(Integer.parseInt(data[0]), data[2], TaskStatus.toStatus(data[3]), data[4], Integer.parseInt(data[5]), LocalDateTime.parse(data[6]), Duration.ofMinutes(Integer.parseInt(data[7])));
+                fileManager.addSubtask(subtask);
+            }
+            default -> throw new IOException("не удалось прочитать файл");
+        }
+    }
 
     public int getId() {
         return id;
@@ -85,38 +103,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return String.format("%s,%s,%s,%s,%s,%d,%s,%d;%n", this.id, this.getClass().getSimpleName(), this.title,
-                this.status, this.description, this.getEpicId(),
-                this.startTime.toString(), this.duration.toMinutes());
-    }
-
-    public static Comparator<Task> getComparator() {
-        return Comparator.comparing(Task::getStartTime);
-    }
-    public static void fromString(String s, TaskManager fileManager) throws IOException {
-        String[] data = s.split(",");
-        switch (data[1]) {
-            case "Task" -> {
-                Task task = new Task(Integer.parseInt(data[0]), data[2],
-                        TaskStatus.toStatus(data[3]), data[4], LocalDateTime.parse(data[6]),
-                        Duration.ofMinutes(Integer.parseInt(data[7])));
-                fileManager.addTask(task);
-            }
-            case "Epic" -> {
-                Epic epic = new Epic(Integer.parseInt(data[0]), data[2],
-                        TaskStatus.toStatus(data[3]), data[4], LocalDateTime.parse(data[6]),
-                        Duration.ofMinutes(Integer.parseInt(data[7])));
-                fileManager.addEpic(epic);
-            }
-            case "Subtask" -> {
-                Subtask subtask = new Subtask(Integer.parseInt(data[0]), data[2],
-                        TaskStatus.toStatus(data[3]), data[4], Integer.parseInt(data[5]),
-                        LocalDateTime.parse(data[6]),
-                        Duration.ofMinutes(Integer.parseInt(data[7])));
-                fileManager.addSubtask(subtask);
-            }
-            default -> throw new IOException("не удалось прочитать файл");
-        }
+        return String.format("%s,%s,%s,%s,%s,%d,%s,%d;%n", this.id, this.getClass().getSimpleName(), this.title, this.status, this.description, this.getEpicId(), this.startTime.toString(), this.duration.toMinutes());
     }
 }
 
