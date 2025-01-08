@@ -69,7 +69,10 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     public List<Task> getSortedTasksById() {
-        return Stream.of(tasks.values(), epicTasks.values(), subtasks.values()).flatMap(Collection::stream).map(task -> (Task) task).sorted(Comparator.comparingInt(Task::getId)).toList();
+        return Stream.of(tasks.values(), epicTasks.values(), subtasks.values())
+                .flatMap(Collection::stream).map(task -> (Task) task)
+                .sorted(Comparator.comparingInt(Task::getId))
+                .toList();
     }
 
     @Override
@@ -104,20 +107,20 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateTask(Task task) {
         Task old = tasks.put(task.getId(), task);
-        if (sortedTasks.remove(old)) sortedTasks.add(task);
+        if (sortedTasks.remove(old)) addTaskToSet(task);
     }
 
     @Override
     public void updateEpic(Epic task) {
         Epic old = epicTasks.put(task.getId(), task);
-        if (sortedTasks.remove(old)) sortedTasks.add(task);
+        if (sortedTasks.remove(old)) addTaskToSet(task);
     }
 
     @Override
     public void updateSubtask(Subtask task) {
         int id = task.getId();
         Subtask old = subtasks.put(id, task);
-        if (sortedTasks.remove(old)) sortedTasks.add(task);
+        if (sortedTasks.remove(old)) addTaskToSet(task);
 
         int epicId = task.getEpicId();
         Epic epic = epicTasks.get(epicId);
@@ -211,7 +214,10 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     void addTaskToSet(Task task) {
-        Optional.ofNullable(task.getStartTime()).ifPresent(startTime -> sortedTasks.add(task));
+        Optional.ofNullable(task.getStartTime())
+                .ifPresent(startTime -> {
+                    if (checkCrossing(task)) sortedTasks.add(task);
+                });
     }
 
     void removeUtils(int id) {
@@ -228,7 +234,15 @@ public class InMemoryTaskManager implements TaskManager {
         }
         task.setId(id);
     }
+
+    Boolean checkCrossing(Task task) {
+        Task before = sortedTasks.lower(task);
+        Task after = sortedTasks.higher(task);
+
+        return (before != null && before.getEndTime().isAfter(task.getStartTime())) ||
+                (after != null && task.getEndTime().isAfter(after.getStartTime()));
+    }
 }
 
 //todo Выводим список задач в порядке приоритета-
-//todo доработать удаление из истории при вызове clear и remove -
+//todo доработать удаление из истории при вызове clear и remove-

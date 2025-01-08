@@ -270,14 +270,10 @@ class InMemoryTaskManagerTest {
 
     private static class EmptyHistoryManager implements HistoryManager {
         @Override
-        public void add(Task task) {
-
-        }
+        public void add(Task task) {}
 
         @Override
-        public void remove(int id) {
-
-        }
+        public void remove(int id) {}
 
         @Override
         public List<Task> getHistory() {

@@ -6,6 +6,8 @@ import org.junit.jupiter.api.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,7 +21,7 @@ class ManagersTest {
 
     @BeforeEach
     void init() {
-        task = new Task("taskTitle", "taskD");
+        task = new Task("taskTitle", "taskD", LocalDateTime.now(), Duration.ofMinutes(50));
     }
 
     @Test
