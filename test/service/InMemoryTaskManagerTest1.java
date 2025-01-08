@@ -4,15 +4,18 @@ import model.*;
 import org.junit.jupiter.api.*;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("InMemoryTaskManager")
-class InMemoryTaskManagerTest {
+class InMemoryTaskManagerTest1 {
 
     @Mock
     private InMemoryHistoryManager inMemoryHistoryManager;
@@ -24,20 +27,20 @@ class InMemoryTaskManagerTest {
         inMemoryTaskManager = new InMemoryTaskManager(inMemoryHistoryManager);
     }
 
-    private Epic createEpic(String title, String description, Duration duration) {
-        Epic epic = new Epic(title, description);
+    private Epic createEpic() {
+        Epic epic = new Epic("Epic 1", "Description 1", LocalDateTime.now(), Duration.ZERO);
         inMemoryTaskManager.addEpic(epic);
         return epic;
     }
 
-    private Task createTask(String title, String description, Duration duration) {
-        Task task = new Task(title, description);
+    private Task createTask() {
+        Task task = new Task("Task 1", "Description 1", LocalDateTime.now(),Duration.ZERO);
         inMemoryTaskManager.addTask(task);
         return task;
     }
 
-    private Subtask createSubtask(String title, String description, int epicId) {
-        Subtask subtask = new Subtask(title, description, epicId);
+    private Subtask createSubtask(int epicId) {
+        Subtask subtask = new Subtask("Subtask 1", "Description 1", epicId, LocalDateTime.now(), Duration.ZERO);
         inMemoryTaskManager.addSubtask(subtask);
         return subtask;
     }
@@ -45,10 +48,10 @@ class InMemoryTaskManagerTest {
     @Test
     @DisplayName("должен вычислять статус эпика по подзадачам")
     void shouldCalculateEpicStatus() {
-        Epic epic = createEpic("Epic 1", "Description 1");
+        Epic epic = createEpic();
 
-        Subtask subtask1 = createSubtask("Subtask 1", "Description 1", epic.getId());
-        Subtask subtask2 = createSubtask("Subtask 2", "Description 2", epic.getId());
+        Subtask subtask1 = createSubtask( epic.getId());
+        Subtask subtask2 = createSubtask( epic.getId());
 
         // Проверка для статуса NEW
         inMemoryTaskManager.calculateEpicStatus(epic.getId());
@@ -65,12 +68,22 @@ class InMemoryTaskManagerTest {
         assertEquals(TaskStatus.DONE, epic.getStatus(), "Статус эпика должен быть DONE");
     }
 
+
+    @Test
+    @DisplayName("должен возвращать список отсортированных задач")
+    void shouldGetSortedEntities() {
+        Task task = createTask();
+        Epic epic = createEpic();
+        Subtask subtask = createSubtask(epic.getId());
+
+        assertEquals(List.of(task,epic,subtask), inMemoryTaskManager.getSortedTasksById(), "Списки должны быть отсортированны по id");
+    }
     @Test
     @DisplayName("должен добавлять задачи, эпики и подзадачи")
     void shouldAddEntities() {
-        Task task = createTask("Task 1", "Description 1");
-        Epic epic = createEpic("Epic 1", "Description 1");
-        Subtask subtask = createSubtask("Subtask 1", "Description 1", epic.getId());
+        Task task = createTask();
+        Epic epic = createEpic();
+        Subtask subtask = createSubtask(epic.getId());
 
         assertAll(
                 () -> assertEquals(task, inMemoryTaskManager.getTask(task.getId()), "Задача должна быть добавлена"),
@@ -82,35 +95,37 @@ class InMemoryTaskManagerTest {
     @Test
     @DisplayName("должен обновлять задачи, эпики и подзадачи")
     void shouldUpdateEntities() {
-        Task task = createTask("Task 1", "Description 1");
-        Epic epic = createEpic("Epic 1", "Description 1");
-        Subtask subtask = createSubtask("Subtask 1", "Description 1", epic.getId());
+        Task task = createTask();
+        Epic epic = createEpic();
+        Subtask subtask = createSubtask(epic.getId());
 
-        task.setTitle("Updated Task");
-        task.setDescription("Updated Description");
-        inMemoryTaskManager.updateTask(task);
+        Duration duration = Duration.ofMinutes(60);
 
-        epic.setTitle("Updated Epic");
-        epic.setDescription("Updated Description");
-        inMemoryTaskManager.updateEpic(epic);
+        Task newTask = new Task("Updated Task", "Updated Description", task.getStartTime().plus(duration), duration);
+        newTask.setId(task.getId());
+        inMemoryTaskManager.updateTask(newTask);
 
-        subtask.setTitle("Updated Subtask");
-        subtask.setDescription("Updated Description");
-        inMemoryTaskManager.updateSubtask(subtask);
+        Epic newEpic = new Epic("Updated Epic", "Updated Description", epic.getStartTime().plus(duration), duration);
+        newEpic.setId(epic.getId());
+        inMemoryTaskManager.updateEpic(newEpic);
+
+        Subtask newSubtask = new Subtask("Updated Subtask", "Updated Description", epic.getId(),subtask.getStartTime().plus(duration), duration);
+        newSubtask.setId(subtask.getId());
+        inMemoryTaskManager.updateSubtask(newSubtask);
 
         assertAll(
-                () -> assertEquals(task, inMemoryTaskManager.getTask(task.getId()), "Задача должна быть обновлена"),
-                () -> assertEquals(epic, inMemoryTaskManager.getEpic(epic.getId()), "Эпик должен быть обновлен"),
-                () -> assertEquals(subtask, inMemoryTaskManager.getSubtask(subtask.getId()), "Подзадача должна быть обновлена")
+                () -> assertEquals(newTask, inMemoryTaskManager.getTask(task.getId()), "Задача должна быть обновлена"),
+                () -> assertEquals(newEpic, inMemoryTaskManager.getEpic(epic.getId()), "Эпик должен быть обновлен"),
+                () -> assertEquals(newSubtask, inMemoryTaskManager.getSubtask(subtask.getId()), "Подзадача должна быть обновлена")
         );
     }
 
     @Test
     @DisplayName("должен очищать все списки")
     void shouldClearAllLists() {
-        Task task = createTask("Task 1", "Description 1");
-        Epic epic = createEpic("Epic 1", "Description 1");
-        Subtask subtask = createSubtask("Subtask 1", "Description 1", epic.getId());
+        Task task = createTask();
+        Epic epic = createEpic();
+        Subtask subtask = createSubtask(epic.getId());
 
         inMemoryTaskManager.clearTasks();
         inMemoryTaskManager.clearEpics();
@@ -119,16 +134,17 @@ class InMemoryTaskManagerTest {
         assertAll(
                 () -> assertTrue(inMemoryTaskManager.getTasks().isEmpty(), "Список задач должен быть пуст"),
                 () -> assertTrue(inMemoryTaskManager.getEpics().isEmpty(), "Список эпиков должен быть пуст"),
-                () -> assertTrue(inMemoryTaskManager.getSubtasks().isEmpty(), "Список подзадач должен быть пуст")
+                () -> assertTrue(inMemoryTaskManager.getSubtasks().isEmpty(), "Список подзадач должен быть пуст"),
+                () -> assertTrue(inMemoryTaskManager.getPrioritizedTasks().isEmpty(), "Список отсортированных по времени задач должен быть пуст")
         );
     }
 
     @Test
     @DisplayName("должен удалять задачи, эпики и подзадачи")
     void shouldRemoveEntities() {
-        Task task = createTask("Task 1", "Description 1");
-        Epic epic = createEpic("Epic 1", "Description 1");
-        Subtask subtask = createSubtask("Subtask 1", "Description 1", epic.getId());
+        Task task = createTask();
+        Epic epic = createEpic();
+        Subtask subtask = createSubtask(epic.getId());
 
         inMemoryTaskManager.removeTask(task.getId());
         inMemoryTaskManager.removeEpic(epic.getId());
@@ -139,6 +155,26 @@ class InMemoryTaskManagerTest {
                 () -> assertNull(inMemoryTaskManager.getEpic(epic.getId()), "Эпик должен быть удален"),
                 () -> assertNull(inMemoryTaskManager.getSubtask(subtask.getId()), "Подзадача должна быть удалена")
         );
+    }
+
+    @Test
+    @DisplayName("должен проверить пересечение задач")
+    void shouldCheckTaskCollisions() {
+        Task task = new Task("Task 1", "Description 1", LocalDateTime.of(LocalDate.now(), LocalTime.of(10, 10)),Duration.ofMinutes(50));
+        Epic epic = new Epic("Epic 1", "Description 1", LocalDateTime.of(LocalDate.now(), LocalTime.of(10, 50)), Duration.ofMinutes(50));
+        Subtask subtask = new Subtask("Subtask 1", "Description 1", epic.getId(), LocalDateTime.of(LocalDate.now(), LocalTime.of(11, 50)), Duration.ofMinutes(50));
+        Subtask subtask1 = new Subtask("Subtask 1", "Description 1", epic.getId());
+
+        inMemoryTaskManager.addTask(task);
+        inMemoryTaskManager.addEpic(epic);
+        inMemoryTaskManager.addSubtask(subtask);
+        inMemoryTaskManager.addSubtask(subtask1);
+        assertTrue(inMemoryTaskManager.sortedTasks.contains(task), "Задачи должны находиться в списке");
+        assertTrue(inMemoryTaskManager.sortedTasks.contains(subtask), "Задачи должны находиться в списке");
+
+        assertFalse(inMemoryTaskManager.sortedTasks.contains(epic), "Задача не должна находиться в обоих списке");
+        assertFalse(inMemoryTaskManager.sortedTasks.contains(subtask1), "Задача не должна находиться в обоих списке");
+
     }
 
 }

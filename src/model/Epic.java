@@ -5,10 +5,14 @@ import java.util.TreeSet;
 
 public class Epic extends Task {
     private LocalDateTime endTime;
-    private final TreeSet<Subtask> subtasks = new TreeSet<>(Task.getComparator());
+    TreeSet<Subtask> subtasks = new TreeSet<>(Task.getComparator());
 
     public Epic(String title, String description) {
         super(title, description);
+    }
+
+    public Epic(String title, String description, LocalDateTime startTime, Duration duration) {
+        super(title,description,startTime, duration);
     }
 
     public Epic(int id, String title, TaskStatus status, String description, LocalDateTime startTime, Duration duration) {
