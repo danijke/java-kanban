@@ -79,57 +79,54 @@ public class InMemoryTaskManager implements TaskManager {
     public void addTask(Task task) {
         generateId(task);
         tasks.put(task.getId(), task);
-        addTaskToSet(task);
+        if (isTimeValid(task) && !isCrossing(task)) sortedTasks.add(task);
     }
 
     @Override
     public void addEpic(Epic task) {
         generateId(task);
         epics.put(task.getId(), task);
-        addTaskToSet(task);
+        if (isTimeValid(task) && !isCrossing(task)) sortedTasks.add(task);
     }
 
     @Override
     public void addSubtask(Subtask task) {
         generateId(task);
         subtasks.put(task.getId(), task);
-        addTaskToSet(task);
 
-        Epic epic = epics.get(task.getEpicId());
-        if (epic != null) {
-            epic.addSubtask(task);
-            if (task.getStatus() != TaskStatus.NEW) {
-                calculateEpicStatus(task.getEpicId());
-            }
+        int epicId = task.getEpicId();
+        if (isTimeValid(task) && !isCrossing(task)) {
+            sortedTasks.add(task);
+            epics.get(epicId).addSubtask(task);
         }
+        if (task.getStatus() != TaskStatus.NEW) {
+            calculateEpicStatus(epicId);
+        }
+
     }
 
     @Override
     public void updateTask(Task task) {
         Task old = tasks.put(task.getId(), task);
-        if (sortedTasks.remove(old)) addTaskToSet(task);
+        if (sortedTasks.remove(old) && isTimeValid(task) && !isCrossing(task)) sortedTasks.add(task);
     }
 
     @Override
     public void updateEpic(Epic task) {
         Epic old = epics.put(task.getId(), task);
-        if (sortedTasks.remove(old)) addTaskToSet(task);
+        if (sortedTasks.remove(old) && isTimeValid(task) && !isCrossing(task)) sortedTasks.add(task);
     }
 
     @Override
     public void updateSubtask(Subtask task) {
         int id = task.getId();
         Subtask old = subtasks.put(id, task);
-        if (sortedTasks.remove(old)) addTaskToSet(task);
-
         int epicId = task.getEpicId();
-        Epic epic = epics.get(epicId);
-        if (epic != null) {
-            epic.updateSubtask(old, task);
-            if (task.getStatus() != TaskStatus.NEW) {
-                calculateEpicStatus(epicId);
-            }
+        if (sortedTasks.remove(old) && isTimeValid(task) && !isCrossing(task)) {
+            sortedTasks.add(task);
+            epics.get(epicId).updateSubtask(old, task);
         }
+        if (task.getStatus() != TaskStatus.NEW) calculateEpicStatus(epicId);
     }
 
     @Override
@@ -213,13 +210,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    void addTaskToSet(Task task) {
-        Optional.ofNullable(task.getStartTime())
-                .ifPresent(startTime -> {
-                    if (checkCrossing(task)) sortedTasks.add(task);
-                });
-    }
-
     void removeUtils(int id) {
         historyManager.remove(id);
         freeIds.offer(id);
@@ -235,13 +225,19 @@ public class InMemoryTaskManager implements TaskManager {
         task.setId(id);
     }
 
-    Boolean checkCrossing(Task task) {
-        if (sortedTasks.isEmpty()) return true;
-        Task before = sortedTasks.lower(task);
-        Task after = sortedTasks.higher(task);
-        if (before == null && after == null) return true;
-        return (before != null && before.getEndTime().isAfter(task.getStartTime())) ||
-                (after != null && task.getEndTime().isAfter(after.getStartTime()));
+    Boolean isTimeValid(Task task) {
+        return Optional.ofNullable(task.getStartTime())
+                .isPresent();
+    }
+
+    Boolean isCrossing(Task task) {
+        return Optional.ofNullable(sortedTasks.lower(task))
+                .map(before -> before.getEndTime() != null && before.getEndTime().isAfter(task.getStartTime()))
+                .orElse(false)
+                ||
+               Optional.ofNullable(sortedTasks.higher(task))
+                .map(after -> task.getEndTime().isAfter(after.getStartTime()))
+                .orElse(false);
     }
 }
 

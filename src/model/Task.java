@@ -22,13 +22,13 @@ public class Task {
         this.duration = duration;
     }
 
-    protected Task(String title, String description) {
+    public Task(String title, String description) {
         this.title = title;
         this.description = description;
         this.status = TaskStatus.NEW;
     }
 
-    protected Task(int id, String title, TaskStatus status, String description, LocalDateTime startTime, Duration duration) {
+    public Task(int id, String title, TaskStatus status, String description, LocalDateTime startTime, Duration duration) {
         this.id = id;
         this.title = title;
         this.status = status;
@@ -38,7 +38,8 @@ public class Task {
     }
 
     public static Comparator<Task> getComparator() {
-        return Comparator.comparing(Task::getStartTime);
+        return Comparator.comparing(Task::getStartTime, Comparator.nullsLast(Comparator.naturalOrder()))
+                         .thenComparing(Task:: getId);
     }
 
     public static void fromString(String s, TaskManager fileManager) throws IOException {
