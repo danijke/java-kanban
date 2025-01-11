@@ -4,15 +4,13 @@ import model.*;
 import org.junit.jupiter.api.*;
 
 import java.time.*;
-import java.util.*;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("История просмотров")
 class InMemoryHistoryManagerTest {
     private InMemoryHistoryManager historyManager;
-    private InMemoryTaskManager taskManager;
-
 
     @BeforeEach
     void init() {

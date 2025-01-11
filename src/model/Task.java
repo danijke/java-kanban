@@ -4,6 +4,7 @@ import service.TaskManager;
 
 import java.io.IOException;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 
 public class Task {
@@ -11,6 +12,7 @@ public class Task {
     private final String description;
     protected Duration duration;
     protected LocalDateTime startTime;
+    protected final static DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private TaskStatus status;
     private int id;
 
@@ -46,15 +48,15 @@ public class Task {
         String[] data = s.split(",");
         switch (data[1]) {
             case "Task" -> {
-                Task task = new Task(Integer.parseInt(data[0]), data[2], TaskStatus.toStatus(data[3]), data[4], LocalDateTime.parse(data[6]), Duration.ofMinutes(Integer.parseInt(data[7])));
+                Task task = new Task(Integer.parseInt(data[0]), data[2], TaskStatus.toStatus(data[3]), data[4], LocalDateTime.parse(data[6], DATE_TIME_FORMATTER), Duration.ofMinutes(Integer.parseInt(data[7])));
                 fileManager.addTask(task);
             }
             case "Epic" -> {
-                Epic epic = new Epic(Integer.parseInt(data[0]), data[2], TaskStatus.toStatus(data[3]), data[4], LocalDateTime.parse(data[6]), Duration.ofMinutes(Integer.parseInt(data[7])));
+                Epic epic = new Epic(Integer.parseInt(data[0]), data[2], TaskStatus.toStatus(data[3]), data[4], LocalDateTime.parse(data[6], DATE_TIME_FORMATTER), Duration.ofMinutes(Integer.parseInt(data[7])));
                 fileManager.addEpic(epic);
             }
             case "Subtask" -> {
-                Subtask subtask = new Subtask(Integer.parseInt(data[0]), data[2], TaskStatus.toStatus(data[3]), data[4], Integer.parseInt(data[5]), LocalDateTime.parse(data[6]), Duration.ofMinutes(Integer.parseInt(data[7])));
+                Subtask subtask = new Subtask(Integer.parseInt(data[0]), data[2], TaskStatus.toStatus(data[3]), data[4], Integer.parseInt(data[5]), LocalDateTime.parse(data[6], DATE_TIME_FORMATTER), Duration.ofMinutes(Integer.parseInt(data[7])));
                 fileManager.addSubtask(subtask);
             }
             default -> throw new IOException("не удалось прочитать файл");
@@ -104,21 +106,8 @@ public class Task {
 
     @Override
     public String toString() {
-        return String.format("%s,%s,%s,%s,%s,%d,%s,%d;%n", this.id, this.getClass().getSimpleName(), this.title, this.status, this.description, this.getEpicId(), this.startTime.toString(), this.duration.toMinutes());
+        return String.format("%s,%s,%s,%s,%s,%s,%s,%s%n", this.id, this.getClass().getSimpleName(), this.title, this.status, this.description, this.getEpicId(), (this.startTime != null ? this.startTime.format(DATE_TIME_FORMATTER) : "null"), (this.duration != null ? this.duration.toMinutes() : "null") // Проверка на null для duration
+        );
     }
 }
 
-//todo добавить в методы добавления, удаления, изменения запись в tresets -
-//todo доработать обновление времени и продолжительности эпика относительно подзадач-
-//todo доработать опцию сохранения состояния в файл -
-//todo добавить в тесты проверку новых полей
-//todo поменять циклы на stream api ~
-//todo
-//todo
-//todo
-//todo
-//todo
-//todo
-//todo
-//todo
-//todo

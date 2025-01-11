@@ -18,28 +18,25 @@ public class InMemoryTaskManager implements TaskManager {
         this.historyManager = historyManager;
     }
 
-    public List<Task> getHistory() {
-        return historyManager.getHistory();
-    }
 
     @Override
     public Task getTask(int id) {
         Task task = tasks.get(id);
-        historyManager.add(task);
+        if (task != null) historyManager.add(task);
         return task;
     }
 
     @Override
     public Epic getEpic(int id) {
         Epic task = epics.get(id);
-        historyManager.add(task);
+        if (task != null) historyManager.add(task);
         return task;
     }
 
     @Override
     public Subtask getSubtask(int id) {
         Subtask task = subtasks.get(id);
-        historyManager.add(task);
+        if (task != null) historyManager.add(task);
         return task;
     }
 
@@ -68,6 +65,7 @@ public class InMemoryTaskManager implements TaskManager {
         return new ArrayList<>(subtasks.values());
     }
 
+    @Override
     public List<Task> getSortedTasksById() {
         return Stream.of(tasks.values(), epics.values(), subtasks.values())
                 .flatMap(Collection::stream).map(task -> (Task) task)
@@ -143,7 +141,7 @@ public class InMemoryTaskManager implements TaskManager {
             subtasks.remove(subtaskId);
             removeUtils(subtaskId);
         });
-        epics.remove(id);
+        Optional.ofNullable(epics.remove(id)).ifPresent(epic -> sortedTasks.remove(epic));
         removeUtils(id);
     }
 
@@ -240,6 +238,3 @@ public class InMemoryTaskManager implements TaskManager {
                 .orElse(false);
     }
 }
-
-//todo Выводим список задач в порядке приоритета-
-//todo доработать удаление из истории при вызове clear и remove-

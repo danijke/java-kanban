@@ -13,10 +13,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public FileBackedTaskManager(HistoryManager historyManager, Path path) {
         super(historyManager);
         this.path = path;
-
     }
 
-    public static FileBackedTaskManager loadFromFile(Path path) {
+    public static FileBackedTaskManager loadFromFile(Path path) throws ManagerSaveException {
         FileBackedTaskManager fileManager = new FileBackedTaskManager(new InMemoryHistoryManager(), path);
         try (BufferedReader br = Files.newBufferedReader(path)) {
             String line;
@@ -102,7 +101,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         save();
     }
 
-    private void save() {
+    void save() throws ManagerSaveException {
         try (BufferedWriter bw = Files.newBufferedWriter(path)) {
             if (Files.notExists(path)) {
                 throw new IOException("файл не найден. ");
