@@ -1,17 +1,31 @@
 package service;
 
+import model.Task;
 import org.junit.jupiter.api.*;
-import org.mockito.*;
+
+import java.util.List;
 
 @DisplayName("InMemoryTaskManager")
 class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 
-    @Mock
-    private InMemoryHistoryManager inMemoryHistoryManager;
-
     @BeforeEach
     void initTaskManager() {
-        MockitoAnnotations.openMocks(this);
-        taskManager = new InMemoryTaskManager(inMemoryHistoryManager);
+        EmptyHistoryManager historyManager = new EmptyHistoryManager();
+        taskManager = new InMemoryTaskManager(historyManager);
+    }
+
+    private static class EmptyHistoryManager implements HistoryManager {
+        @Override
+        public void add(Task task) {
+        }
+
+        @Override
+        public void remove(int id) {
+        }
+
+        @Override
+        public List<Task> getHistory() {
+            return List.of();
+        }
     }
 }
