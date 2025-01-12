@@ -3,11 +3,8 @@ package service;
 import exception.ManagerSaveException;
 import model.*;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.*;
+import java.nio.file.*;
 import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
@@ -16,10 +13,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public FileBackedTaskManager(HistoryManager historyManager, Path path) {
         super(historyManager);
         this.path = path;
-
     }
 
-    public static FileBackedTaskManager loadFromFile(Path path) {
+    public static FileBackedTaskManager loadFromFile(Path path) throws ManagerSaveException {
         FileBackedTaskManager fileManager = new FileBackedTaskManager(new InMemoryHistoryManager(), path);
         try (BufferedReader br = Files.newBufferedReader(path)) {
             String line;
@@ -105,13 +101,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         save();
     }
 
-    private void save() {
+    void save() throws ManagerSaveException {
         try (BufferedWriter bw = Files.newBufferedWriter(path)) {
             if (Files.notExists(path)) {
                 throw new IOException("файл не найден. ");
             }
-            List<Task> allTasks = getAllTasks();
-            bw.write("id,type,name,status,description,epic\n");
+            List<Task> allTasks = getSortedTasksById();
+            bw.write("id,type,name,status,description,epic,time,duration\n");
             for (Task task : allTasks) {
                 bw.write(task.toString());
             }
@@ -120,3 +116,4 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 }
+//todo исправить очередь id при сохранении

@@ -1,19 +1,21 @@
 package service;
 
-import model.Epic;
-import model.Subtask;
-import model.Task;
+import model.*;
 
 import java.util.List;
 
 public interface TaskManager {
+    List<Task> getSortedTasksById();
+
+    List<Task> getPrioritizedTasks();
+
     Task getTask(int id);
 
     Epic getEpic(int id);
 
     Subtask getSubtask(int id);
 
-    List<Subtask> getEpicSubtasks(Epic epic);
+    List<Subtask> getEpicSubtasks(int id);
 
     List<Task> getTasks();
 

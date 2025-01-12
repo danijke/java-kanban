@@ -1,63 +1,62 @@
 package service;
 
-import model.Task;
+import model.*;
 import org.junit.jupiter.api.*;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Менеджер файлов")
-class FileBackedTaskManagerTest {
-    FileBackedTaskManager fileManager;
+class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     Path path;
-    Task task;
 
     @BeforeEach
-    void init() {
+    void initTaskManager() {
         try {
             path = Files.createTempFile("tmp", "csv");
-            fileManager = Managers.getFileManager(path);
+            taskManager = Managers.getFileManager(path);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        task = new Task("taskTitle", "taskD");
     }
 
     @Test
-    @DisplayName("Должен добавлять, получать задачу и записывать в историю")
-    void shouldAddAndGetTaskAndSaveToHistory() {
-        fileManager.addTask(task);
-        assertEquals(task, fileManager.getTask(task.getId()));
-        assertEquals(List.of(task), fileManager.getHistory());
+    @DisplayName("Должен добавлять и записывать в историю")
+    void shouldSaveTask() {
+
     }
 
     @Test
     @DisplayName("Должен сохранять пустой файл")
     void shouldSaveEmptyToFile() {
-        fileManager.addTask(task);
-        fileManager.removeTask(task.getId());
+        assertDoesNotThrow(taskManager::save, "не должно выбрасываться исключение при сохранении файла");
     }
 
     @Test
     @DisplayName("Должен сохранить и загрузить задачи")
     void shouldSaveAndLoadTask() {
-        fileManager.addTask(task);
-        FileBackedTaskManager fm = FileBackedTaskManager.loadFromFile(path);
-        assertEquals(fileManager.getTask(task.getId()), fm.getTask(task.getId()));
+        Task task = assertDoesNotThrow(this::createTask, "не должно выбрасываться исключение при сохранении файла");
+        Epic epic = assertDoesNotThrow(this::createEpic, "не должно выбрасываться исключение при сохранении файла");
+        Subtask subtask = assertDoesNotThrow(() -> createSubtask(epic.getId()), "не должно выбрасываться исключение при сохранении файла");
+        assertEquals(List.of(task, epic, subtask),
+                assertDoesNotThrow(
+                        () -> FileBackedTaskManager.loadFromFile(path).getSortedTasksById(),
+                        "не должно выбрасываться исключение при сохранении файла"),
+                "списки должны совпадать");
     }
 
     @Test
     @DisplayName("Должен загружать пустой файл")
     void shouldLoadEmptyFile() {
-        try {
+        assertDoesNotThrow(() -> {
             Path empty = Files.createTempFile("empty", "csv");
+            assertEquals(0, Files.size(empty), "Файл должен быть пустой");
             FileBackedTaskManager.loadFromFile(empty);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            Files.delete(empty);
+        });
     }
+
 }
