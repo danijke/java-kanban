@@ -2,6 +2,7 @@ package service;
 
 import exception.NotFoundException;
 import model.*;
+import org.junit.jupiter.api.function.Executable;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -247,7 +248,7 @@ public class InMemoryTaskManager implements TaskManager {
                 .orElse(false)
                 ||
                Optional.ofNullable(sortedTasks.higher(task))
-                .map(after -> task.getEndTime().isAfter(after.getStartTime()))
+                .map(after -> task.getEndTime()!= null && task.getEndTime().isAfter(after.getStartTime()))
                 .orElse(false);
     }
 }

@@ -23,10 +23,10 @@ public class HttpTaskServer {
             System.err.println("Ошибка при создании сервера");
         }
         server.createContext("/tasks", new TaskHandler());
-        server.createContext("/subtasks", new SubtasksHandler());
+        /*server.createContext("/subtasks", new SubtasksHandler());
         server.createContext("/epics", new EpicsHandler());
         server.createContext("/history", new HistoryHandler());
-        server.createContext("/prioritized", new PrioritizedHandler());
+        server.createContext("/prioritized", new PrioritizedHandler());*/
         server.start();
         System.out.println("Сервер создан. Порт: " + PORT);
     }

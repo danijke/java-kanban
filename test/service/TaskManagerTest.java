@@ -1,5 +1,6 @@
 package service;
 
+import exception.NotFoundException;
 import model.*;
 import org.junit.jupiter.api.*;
 
@@ -125,8 +126,9 @@ abstract public class TaskManagerTest<T extends TaskManager> {
         taskManager.removeTask(task.getId());
         taskManager.removeEpic(epic.getId());
         taskManager.removeSubtask(subtask.getId());
-
-        assertAll(() -> assertNull(taskManager.getTask(task.getId()), "Задача должна быть удалена"), () -> assertNull(taskManager.getEpic(epic.getId()), "Эпик должен быть удален"), () -> assertNull(taskManager.getSubtask(subtask.getId()), "Подзадача должна быть удалена"));
+        assertThrows(NotFoundException.class, () -> taskManager.getTask(task.getId()), "не должно выбрасываться исключение при сохранении файла");
+        assertThrows(NotFoundException.class,() ->taskManager.getEpic(epic.getId()), "не должно выбрасываться исключение при сохранении файла");
+        assertThrows(NotFoundException.class,() ->taskManager.getSubtask(subtask.getId()), "не должно выбрасываться исключение при сохранении файла");
     }
 
     @Test

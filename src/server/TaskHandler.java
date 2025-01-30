@@ -16,7 +16,6 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
         if (id.isPresent()) {
             try {
                 Task task = taskManager.getTask(id.get());
-                sendText(exchange);
             } catch (NotFoundException e) {
                 sendNotFound(exchange, e.getMessage());
             }

@@ -1,5 +1,7 @@
 package model;
 
+import com.google.gson.annotations.Expose;
+
 import java.time.*;
 import java.util.TreeSet;
 
@@ -9,14 +11,17 @@ public class Epic extends Task {
 
     public Epic(String title, String description) {
         super(title, description);
+        this.type = Type.EPIC;
     }
 
     public Epic(String title, String description, LocalDateTime startTime, Duration duration) {
         super(title, description, startTime, duration);
+        this.type = Type.EPIC;
     }
 
     public Epic(int id, String title, TaskStatus status, String description, LocalDateTime startTime, Duration duration) {
         super(id, title, status, description, startTime, duration);
+        this.type = Type.EPIC;
     }
 
     @Override

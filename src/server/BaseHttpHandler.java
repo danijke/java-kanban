@@ -1,11 +1,16 @@
 package server;
 
+import com.google.gson.*;
+import com.google.gson.stream.*;
 import com.sun.net.httpserver.*;
-import model.Task;
+import model.*;
 import service.TaskManager;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 public abstract class BaseHttpHandler implements HttpHandler {
@@ -84,6 +89,65 @@ public abstract class BaseHttpHandler implements HttpHandler {
             return Optional.empty();
         }
     }
+
+    static class LocalDateTimeAdapter implements JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
+        private static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        @Override
+        public JsonElement serialize(LocalDateTime dateTime, Type type, JsonSerializationContext context) {
+            return new JsonPrimitive(dateTime.format(dtf));
+        }
+
+        @Override
+        public LocalDateTime deserialize(JsonElement json, Type type, JsonDeserializationContext context) {
+            return LocalDateTime.parse(json.getAsString(), dtf);
+        }
+    }
+
+    static class DurationAdapter implements JsonSerializer<Duration>, JsonDeserializer<Duration> {
+        @Override
+        public JsonElement serialize(Duration duration, Type type, JsonSerializationContext context) {
+            return new JsonPrimitive(duration.toString());
+        }
+
+        @Override
+        public Duration deserialize(JsonElement json, Type type, JsonDeserializationContext context) {
+            return Duration.parse(json.getAsString());
+        }
+    }
+
+    public static class SubtaskAdapter implements JsonSerializer<Subtask> {
+        @Override
+        public JsonElement serialize(Subtask subtask, Type type, JsonSerializationContext context) {
+            JsonObject jsonObject = context.serialize((Task) subtask).getAsJsonObject(); // Сериализуем Task
+            jsonObject.addProperty("epicId", subtask.getEpicId()); // Добавляем epicId в конец
+            return jsonObject;
+        }
+    }
+
+
+    static class JsonUtils {
+        private static final Gson gson = new GsonBuilder()
+                .registerTypeAdapter(Subtask.class, new SubtaskAdapter())
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .registerTypeAdapter(Duration.class, new DurationAdapter())
+                .excludeFieldsWithoutExposeAnnotation()
+                .create();
+
+        public static String toJson(Task task) {
+            return gson.toJson(task);
+        }
+
+        public static String toJson(Subtask task) {
+            return gson.toJson(task);
+        }
+
+        public static <T extends Task> T fromJson(String json, Class<T> task) {
+            return gson.fromJson(json, task);
+        }
+    }
+
+
 
 
 

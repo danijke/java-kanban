@@ -1,5 +1,6 @@
 package model;
 
+import com.google.gson.annotations.Expose;
 import service.TaskManager;
 
 import java.io.IOException;
@@ -8,15 +9,24 @@ import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 
 public class Task {
-    private final String title;
-    private final String description;
-    protected Duration duration;
-    protected LocalDateTime startTime;
-    protected static final  DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private TaskStatus status;
+    @Expose
+    protected Type type;
+    @Expose
     private int id;
+    @Expose
+    private final String title;
+    @Expose
+    private TaskStatus status;
+    @Expose
+    private final String description;
+    @Expose
+    protected LocalDateTime startTime;
+    @Expose
+    protected Duration duration;
 
+    protected static final  DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     public Task(String title, String description, LocalDateTime startTime, Duration duration) {
+        this.type = Type.TASK;
         this.title = title;
         this.description = description;
         this.status = TaskStatus.NEW;
@@ -32,6 +42,7 @@ public class Task {
 
     public Task(int id, String title, TaskStatus status, String description, LocalDateTime startTime, Duration duration) {
         this.id = id;
+        this.type = Type.TASK;
         this.title = title;
         this.status = status;
         this.description = description;
@@ -47,15 +58,15 @@ public class Task {
     public static void fromString(String s, TaskManager fileManager) throws IOException {
         String[] data = s.split(",");
         switch (data[1]) {
-            case "Task" -> {
+            case "TASK" -> {
                 Task task = new Task(Integer.parseInt(data[0]), data[2], TaskStatus.toStatus(data[3]), data[4], LocalDateTime.parse(data[6], DATE_TIME_FORMATTER), Duration.ofMinutes(Integer.parseInt(data[7])));
                 fileManager.addTask(task);
             }
-            case "Epic" -> {
+            case "EPIC" -> {
                 Epic epic = new Epic(Integer.parseInt(data[0]), data[2], TaskStatus.toStatus(data[3]), data[4], LocalDateTime.parse(data[6], DATE_TIME_FORMATTER), Duration.ofMinutes(Integer.parseInt(data[7])));
                 fileManager.addEpic(epic);
             }
-            case "Subtask" -> {
+            case "SUBTASK" -> {
                 Subtask subtask = new Subtask(Integer.parseInt(data[0]), data[2], TaskStatus.toStatus(data[3]), data[4], Integer.parseInt(data[5]), LocalDateTime.parse(data[6], DATE_TIME_FORMATTER), Duration.ofMinutes(Integer.parseInt(data[7])));
                 fileManager.addSubtask(subtask);
             }
@@ -106,7 +117,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return String.format("%s,%s,%s,%s,%s,%s,%s,%s%n", this.id, this.getClass().getSimpleName(), this.title, this.status, this.description, this.getEpicId(), (this.startTime != null ? this.startTime.format(DATE_TIME_FORMATTER) : "null"), (this.duration != null ? this.duration.toMinutes() : "null") // Проверка на null для duration
+        return String.format("%s,%s,%s,%s,%s,%s,%s,%s%n", this.id, this.type, this.title, this.status, this.description, this.getEpicId(), (this.startTime != null ? this.startTime.format(DATE_TIME_FORMATTER) : "null"), (this.duration != null ? this.duration.toMinutes() : "null") // Проверка на null для duration
         );
     }
 }
