@@ -1,6 +1,7 @@
 package server;
 
 import com.sun.net.httpserver.*;
+import exception.NotFoundException;
 import model.Task;
 import service.TaskManager;
 
@@ -12,13 +13,14 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
 
     @Override
     public void handleGet(HttpExchange exchange, Optional<Integer> id) throws IOException {
-        id.ifPresentOrElse(
-                (task) -> {
-                    task = TaskManager::getTask;
-
-                },
-                ()-> {}
-        );
+        if (id.isPresent()) {
+            try {
+                Task task = taskManager.getTask(id.get());
+                sendText(exchange);
+            } catch (NotFoundException e) {
+                sendNotFound(exchange, e.getMessage());
+            }
+        }
 
     }
 
@@ -32,7 +34,7 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
 
     }
 }
-//todo добавить gson как библиотеку
+//todo добавить gson как библиотеку-
 //todo реализовать методы handle в наследниках~
 //todo написать методы сериализации и десиарилизации gson для каждого типа задач
-//todo пробросить NotFoundException из TaskManager при отсутсвии задачи и обработать их в обработчиках(возможно добавить приватный метод)
+//todo пробросить NotFoundException из TaskManager при отсутсвии задачи и обработать их в обработчиках(возможно добавить приватный метод)~

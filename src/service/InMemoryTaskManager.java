@@ -1,5 +1,6 @@
 package service;
 
+import exception.NotFoundException;
 import model.*;
 
 import java.util.*;
@@ -22,21 +23,33 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task getTask(int id) {
         Task task = tasks.get(id);
-        if (task != null) historyManager.add(task);
+        if (task != null) {
+            historyManager.add(task);
+        } else {
+            throw new NotFoundException("задача с данным id не найдена.");
+        }
         return task;
     }
 
     @Override
     public Epic getEpic(int id) {
         Epic task = epics.get(id);
-        if (task != null) historyManager.add(task);
+        if (task != null) {
+            historyManager.add(task);
+        } else {
+            throw new NotFoundException("задача с данным id не найдена.");
+        }
         return task;
     }
 
     @Override
     public Subtask getSubtask(int id) {
         Subtask task = subtasks.get(id);
-        if (task != null) historyManager.add(task);
+        if (task != null) {
+            historyManager.add(task);
+        } else {
+            throw new NotFoundException("задача с данным id не найдена.");
+        }
         return task;
     }
 

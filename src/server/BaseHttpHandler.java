@@ -79,7 +79,7 @@ public abstract class BaseHttpHandler implements HttpHandler {
         String path = exchange.getRequestURI().getPath();
         String[] parts = path.split("/");
         try {
-            return Optional.of(Integer.parseInt(parts[2]));
+            return Optional.of(Integer.parseInt(parts[parts.length-1]));
         } catch (NumberFormatException e) {
             return Optional.empty();
         }
