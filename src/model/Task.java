@@ -1,6 +1,6 @@
 package model;
 
-import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.*;
 import service.TaskManager;
 
 import java.io.IOException;
@@ -22,6 +22,7 @@ public class Task {
     @Expose
     protected LocalDateTime startTime;
     @Expose
+    @SerializedName("durationInMinutes")
     protected Duration duration;
 
     protected static final  DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -82,12 +83,24 @@ public class Task {
         this.id = id;
     }
 
+    public Type getType() {
+        return this.type;
+    }
+
+    public String getTitle() {
+        return this.title;
+    }
+
     public TaskStatus getStatus() {
         return status;
     }
 
     public void setStatus(TaskStatus status) {
         this.status = status;
+    }
+
+    public String getDescription() {
+        return this.description;
     }
 
     public Integer getEpicId() {

@@ -31,8 +31,8 @@ public class Subtask extends Task {
         return epicId;
     }
 
-
     public Duration getDuration() {
         return duration;
     }
+
 }

@@ -1,6 +1,5 @@
 package model;
 
-import com.google.gson.annotations.Expose;
 
 import java.time.*;
 import java.util.TreeSet;

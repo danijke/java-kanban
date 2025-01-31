@@ -24,8 +24,7 @@ public class Main {
         Gson gson = new GsonBuilder()
 
                         .excludeFieldsWithoutExposeAnnotation()
-                        .registerTypeAdapter(Subtask.class, new SubtaskAdapter())
-
+                .registerTypeAdapter(Subtask.class, new SubtaskAdapter())
                         .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                         .registerTypeAdapter(Duration.class, new DurationAdapter())
                         .create();
@@ -50,6 +49,7 @@ public class Main {
         taskManager.removeEpic(epic.getId());
         epic = gson.fromJson(jsonEpic, Epic.class);
         taskManager.addEpic(epic);
+        System.out.println(epic);
 
 
     }
@@ -76,22 +76,23 @@ public class Main {
         }
     }
 
-//    static class SubtaskAdapter implements JsonSerializer<Subtask> {
-//        @Override
-//        public JsonElement serialize(Subtask subtask, Type type, JsonSerializationContext context) {
-//            JsonObject response = new JsonObject();
-//            String typeName = type.getTypeName().split("\\.")[1];
-//            response.addProperty("id", subtask.getId());
-//            response.addProperty("type", typeName);
-//            response.add("status", context.serialize(subtask.getStatus()));
-//            response.addProperty("epicId", subtask.getEpicId());
-//            response.addProperty("name", subtask.getTitle());
-//            response.addProperty("description", subtask.getDescription());
-//            response.add("startTime", context.serialize(subtask.getStartTime()));
-//            response.add("durationInHours", context.serialize(subtask.getDuration()));
-//            return response;
-//        }
-//    }
+
+
+    static class SubtaskAdapter implements JsonSerializer<Subtask> {
+        @Override
+        public JsonElement serialize(Subtask subtask, Type type, JsonSerializationContext context) {
+            JsonObject jsonObj = new JsonObject();
+            jsonObj.addProperty("type", subtask.getType().toString());
+            jsonObj.addProperty("id", subtask.getId());
+            jsonObj.addProperty("status", subtask.getStatus().toString());
+            jsonObj.addProperty("epicId", subtask.getEpicId());
+            jsonObj.addProperty("name", subtask.getTitle());
+            jsonObj.addProperty("description", subtask.getDescription());
+            jsonObj.add("startTime", context.serialize(subtask.getStartTime()));
+            jsonObj.add("durationInMinutes", context.serialize(subtask.getDuration()));
+            return jsonObj;
+        }
+    }
 
     static class DurationAdapter extends TypeAdapter<Duration> {
         @Override

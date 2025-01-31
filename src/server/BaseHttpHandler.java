@@ -6,12 +6,12 @@ import com.sun.net.httpserver.*;
 import model.*;
 import service.TaskManager;
 
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
+import java.util.*;
 
 public abstract class BaseHttpHandler implements HttpHandler {
     protected static TaskManager taskManager;
@@ -79,6 +79,19 @@ public abstract class BaseHttpHandler implements HttpHandler {
         h.close();
     }
 
+    protected <T extends Task> Optional<T> parseTask(InputStream inputStream, Class<T> type) throws IOException {
+        String body = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        boolean requiredStrings = body.contains("title") &&
+                                  body.contains("type") &&
+                                  body.contains("description");
+        if (requiredStrings) {
+            T task = JsonUtils.fromJson(body, type);
+            return Optional.of(task);
+        } else {
+            return Optional.empty();
+        }
+    }
+
 
     private Optional<Integer> getIdFromPath(HttpExchange exchange) {
         String path = exchange.getRequestURI().getPath();
@@ -116,12 +129,19 @@ public abstract class BaseHttpHandler implements HttpHandler {
         }
     }
 
-    public static class SubtaskAdapter implements JsonSerializer<Subtask> {
+    static class SubtaskAdapter implements JsonSerializer<Subtask> {
         @Override
         public JsonElement serialize(Subtask subtask, Type type, JsonSerializationContext context) {
-            JsonObject jsonObject = context.serialize((Task) subtask).getAsJsonObject(); // Сериализуем Task
-            jsonObject.addProperty("epicId", subtask.getEpicId()); // Добавляем epicId в конец
-            return jsonObject;
+            JsonObject jsonObj = new JsonObject();
+            jsonObj.addProperty("type", subtask.getType().toString());
+            jsonObj.addProperty("id", subtask.getId());
+            jsonObj.addProperty("status", subtask.getStatus().toString());
+            jsonObj.addProperty("epicId", subtask.getEpicId());
+            jsonObj.addProperty("name", subtask.getTitle());
+            jsonObj.addProperty("description", subtask.getDescription());
+            jsonObj.add("startTime", context.serialize(subtask.getStartTime()));
+            jsonObj.add("durationInMinutes", context.serialize(subtask.getDuration()));
+            return jsonObj;
         }
     }
 
@@ -137,13 +157,12 @@ public abstract class BaseHttpHandler implements HttpHandler {
         public static String toJson(Task task) {
             return gson.toJson(task);
         }
-
-        public static String toJson(Subtask task) {
-            return gson.toJson(task);
+        public static String toJson(List<Task> tasks)  {
+            return gson.toJson(tasks);
         }
 
-        public static <T extends Task> T fromJson(String json, Class<T> task) {
-            return gson.fromJson(json, task);
+        public static <T extends Task> T fromJson(String json, Class<T> type) {
+            return gson.fromJson(json, type);
         }
     }
 

@@ -15,16 +15,22 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
     public void handleGet(HttpExchange exchange, Optional<Integer> id) throws IOException {
         if (id.isPresent()) {
             try {
-                Task task = taskManager.getTask(id.get());
+                sendText(exchange, JsonUtils.toJson(taskManager.getTask(id.get())));
             } catch (NotFoundException e) {
                 sendNotFound(exchange, e.getMessage());
             }
+        } else {
+            sendText(exchange, JsonUtils.toJson(taskManager.getTasks()));
         }
 
     }
 
     @Override
     public void handlePost(HttpExchange exchange, Optional<Integer> id) throws IOException {
+        if (id.isPresent()) {
+//
+
+        }
 
     }
 
