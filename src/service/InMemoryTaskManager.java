@@ -1,7 +1,8 @@
 package service;
 
-import exception.NotFoundException;
+import exception.*;
 import model.*;
+
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -20,12 +21,16 @@ public class InMemoryTaskManager implements TaskManager {
 
 
     @Override
+    public List<Task> getHistory() {
+        return this.historyManager.getHistory();
+    }
+    @Override
     public Task getTask(int id) {
         Task task = tasks.get(id);
         if (task != null) {
             historyManager.add(task);
         } else {
-            throw new NotFoundException("задача с данным id не найдена.");
+            throw new NotFoundException("задача c id: " + id + " не найдена.");
         }
         return task;
     }
@@ -36,7 +41,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (task != null) {
             historyManager.add(task);
         } else {
-            throw new NotFoundException("задача с данным id не найдена.");
+            throw new NotFoundException("эпик c id: " + id + " не найден.");
         }
         return task;
     }
@@ -47,7 +52,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (task != null) {
             historyManager.add(task);
         } else {
-            throw new NotFoundException("задача с данным id не найдена.");
+            throw new NotFoundException("подзадача c id: " + id + " не найдена.");
         }
         return task;
     }
@@ -86,33 +91,46 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void addTask(Task task) {
+    public void addTask(Task task) throws InteractedException {
         generateId(task);
-        tasks.put(task.getId(), task);
-        if (isTimeValid(task) && !isCrossing(task)) sortedTasks.add(task);
-    }
-
-    @Override
-    public void addEpic(Epic task) {
-        generateId(task);
-        epics.put(task.getId(), task);
-        if (isTimeValid(task) && !isCrossing(task)) sortedTasks.add(task);
-    }
-
-    @Override
-    public void addSubtask(Subtask task) {
-        generateId(task);
-        subtasks.put(task.getId(), task);
-
-        int epicId = task.getEpicId();
-        if (isTimeValid(task) && !isCrossing(task)) {
+        if (isTimeValid(task)) {
+            if (isCrossing(task)) {
+                throw new InteractedException();
+            }
             sortedTasks.add(task);
-            epics.get(epicId).addSubtask(task);
         }
-        if (task.getStatus() != TaskStatus.NEW) {
+        tasks.put(task.getId(), task);
+    }
+
+    @Override
+    public void addEpic(Epic epic) {
+        generateId(epic);
+        if (isTimeValid(epic)) {
+            if (isCrossing(epic)) {
+                throw new InteractedException();
+            }
+            sortedTasks.add(epic);
+        }
+        epics.put(epic.getId(), epic);
+    }
+
+    @Override
+    public void addSubtask(Subtask subtask) {
+        generateId(subtask);
+        int epicId = subtask.getEpicId();
+        if (isTimeValid(subtask)) {
+            if (isCrossing(subtask)) {
+                throw new InteractedException();
+            }
+            sortedTasks.add(subtask);
+            Optional.ofNullable(epics.get(epicId))
+                    .orElseThrow(() -> new NotFoundException("эпик с id: " + epicId + " не найден"))
+                    .addSubtask(subtask);
+        }
+        subtasks.put(subtask.getId(), subtask);
+        if (subtask.getStatus() != TaskStatus.NEW) {
             calculateEpicStatus(epicId);
         }
-
     }
 
     @Override
@@ -128,15 +146,17 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateSubtask(Subtask task) {
-        int id = task.getId();
-        Subtask old = subtasks.put(id, task);
-        int epicId = task.getEpicId();
-        if (sortedTasks.remove(old) && isTimeValid(task) && !isCrossing(task)) {
-            sortedTasks.add(task);
-            epics.get(epicId).updateSubtask(old, task);
+    public void updateSubtask(Subtask subtask) {
+        int id = subtask.getId();
+        Subtask old = subtasks.put(id, subtask);
+        int epicId = subtask.getEpicId();
+        if (sortedTasks.remove(old) && isTimeValid(subtask) && !isCrossing(subtask)) {
+            sortedTasks.add(subtask);
+            Optional.ofNullable(epics.get(epicId))
+                    .orElseThrow(() -> new NotFoundException("эпик с id: " + epicId + " не найден"))
+                    .updateSubtask(old,subtask);
         }
-        if (task.getStatus() != TaskStatus.NEW) calculateEpicStatus(epicId);
+        if (subtask.getStatus() != TaskStatus.NEW) calculateEpicStatus(epicId);
     }
 
     @Override

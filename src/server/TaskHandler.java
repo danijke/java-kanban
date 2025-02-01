@@ -1,18 +1,17 @@
 package server;
 
 import com.sun.net.httpserver.*;
-import exception.NotFoundException;
+import exception.*;
 import model.Task;
-import service.TaskManager;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 public class TaskHandler extends BaseHttpHandler implements HttpHandler {
 
     @Override
-    public void handleGet(HttpExchange exchange, Optional<Integer> id) throws IOException {
+    public void handleGet(HttpExchange exchange) throws IOException {
+        Optional<Integer> id = getIdFromPath(exchange);
         if (id.isPresent()) {
             try {
                 sendText(exchange, JsonUtils.toJson(taskManager.getTask(id.get())));
@@ -22,24 +21,39 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
         } else {
             sendText(exchange, JsonUtils.toJson(taskManager.getTasks()));
         }
-
     }
 
     @Override
-    public void handlePost(HttpExchange exchange, Optional<Integer> id) throws IOException {
-        if (id.isPresent()) {
-//
-
+    public void handlePost(HttpExchange exchange) throws IOException {
+        Optional<Integer> id = getIdFromPath(exchange);
+        try (InputStream inputStream = exchange.getRequestBody()) {
+            Optional<Task> task = parseTask(inputStream, Task.class);
+            if (task.isPresent()) {
+                if (id.isPresent()) {
+                    taskManager.updateTask(task.get());
+                    sendPostText(exchange, "задача успешно обновлена.");
+                } else {
+                    try {
+                        taskManager.addTask(task.get());
+                        sendPostText(exchange, "задача успешно добавлена.");
+                    } catch (InteractedException e) {
+                        sendHasInteractions(exchange);
+                    }
+                }
+            } else {
+                sendBadRequest(exchange);
+            }
         }
-
     }
 
     @Override
-    public void handleDelete(HttpExchange exchange, Optional<Integer> id) throws IOException {
-
+    public void handleDelete(HttpExchange exchange) throws IOException {
+        Optional<Integer> id = getIdFromPath(exchange);
+        if (id.isPresent()) {
+            taskManager.removeTask(id.get());
+            sendText(exchange, "задача успешно удалена.");
+        } else {
+            sendBadRequest(exchange);
+        }
     }
 }
-//todo добавить gson как библиотеку-
-//todo реализовать методы handle в наследниках~
-//todo написать методы сериализации и десиарилизации gson для каждого типа задач
-//todo пробросить NotFoundException из TaskManager при отсутсвии задачи и обработать их в обработчиках(возможно добавить приватный метод)~

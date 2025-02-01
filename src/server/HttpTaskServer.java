@@ -10,23 +10,24 @@ import java.nio.file.Paths;
 public class HttpTaskServer {
     private static final int PORT = 8080;
     private static HttpServer server;
-    private static final TaskManager taskManager = Managers.getFileManager(Paths.get("data.csv"));
+    private static TaskManager taskManager;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
+        taskManager = Managers.getFileManager(Paths.get("data.csv"));
         start();
     }
 
-    private static void start() {
+    public static void start() {
         try {
             server = HttpServer.create(new InetSocketAddress(PORT), 0);
         } catch (IOException e) {
             System.err.println("Ошибка при создании сервера");
         }
         server.createContext("/tasks", new TaskHandler());
-        /*server.createContext("/subtasks", new SubtasksHandler());
         server.createContext("/epics", new EpicsHandler());
+        server.createContext("/subtasks", new SubtasksHandler());
         server.createContext("/history", new HistoryHandler());
-        server.createContext("/prioritized", new PrioritizedHandler());*/
+        server.createContext("/prioritized", new PrioritizedHandler());
         server.start();
         System.out.println("Сервер создан. Порт: " + PORT);
     }
@@ -37,5 +38,9 @@ public class HttpTaskServer {
 
     public static TaskManager getTaskManager() {
         return taskManager;
+    }
+
+    public static void setDefaultManager(TaskManager manager) {
+        taskManager = manager;
     }
 }

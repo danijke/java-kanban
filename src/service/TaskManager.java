@@ -5,6 +5,7 @@ import model.*;
 import java.util.List;
 
 public interface TaskManager {
+    List<Task> getHistory();
     List<Task> getSortedTasksById();
 
     List<Task> getPrioritizedTasks();
