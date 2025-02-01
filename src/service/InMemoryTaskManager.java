@@ -19,11 +19,11 @@ public class InMemoryTaskManager implements TaskManager {
         this.historyManager = historyManager;
     }
 
-
     @Override
     public List<Task> getHistory() {
         return this.historyManager.getHistory();
     }
+
     @Override
     public Task getTask(int id) {
         Task task = tasks.get(id);
@@ -266,7 +266,7 @@ public class InMemoryTaskManager implements TaskManager {
                 .orElse(false)
                 ||
                Optional.ofNullable(sortedTasks.higher(task))
-                .map(after -> task.getEndTime()!= null && task.getEndTime().isAfter(after.getStartTime()))
+                .map(after -> task.getEndTime() != null && task.getEndTime().isAfter(after.getStartTime()))
                 .orElse(false);
     }
 }
