@@ -1,8 +1,11 @@
 package model;
 
+import com.google.gson.annotations.Expose;
+
 import java.time.*;
 
 public class Subtask extends Task {
+    @Expose
     private final int epicId;
 
     public Subtask(String title, String description, int epicId) {
@@ -23,10 +26,5 @@ public class Subtask extends Task {
     @Override
     public Integer getEpicId() {
         return epicId;
-    }
-
-
-    public Duration getDuration() {
-        return duration;
     }
 }

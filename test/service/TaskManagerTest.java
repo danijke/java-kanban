@@ -1,5 +1,6 @@
 package service;
 
+import exception.*;
 import model.*;
 import org.junit.jupiter.api.*;
 
@@ -12,19 +13,24 @@ abstract public class TaskManagerTest<T extends TaskManager> {
     protected T taskManager;
 
     protected Epic createEpic() {
-        Epic epic = new Epic("Epic 1", "Description 1", LocalDateTime.now(), Duration.ZERO);
+        Epic epic = new Epic("Epic 1", "Description 1");
         taskManager.addEpic(epic);
         return epic;
     }
 
     protected Task createTask() {
-        Task task = new Task("Task 1", "Description 1", LocalDateTime.now(), Duration.ZERO);
+        Task task = new Task("Task 1", "Description 1", LocalDateTime.of(LocalDate.now(), LocalTime.of(10, 10)), Duration.ofMinutes(50));
         taskManager.addTask(task);
         return task;
     }
 
     protected Subtask createSubtask(int epicId) {
-        Subtask subtask = new Subtask("Subtask 1", "Description 1", epicId, LocalDateTime.now(), Duration.ZERO);
+        Subtask subtask = new Subtask("Subtask 1", "Description 1", epicId, LocalDateTime.of(LocalDate.now(), LocalTime.of(11, 0)), Duration.ofMinutes(50));
+        taskManager.addSubtask(subtask);
+        return subtask;
+    }
+    protected Subtask createAnSubtask(int epicId) {
+        Subtask subtask = new Subtask("Subtask 2", "Description 2", epicId, LocalDateTime.of(LocalDate.now(), LocalTime.of(11, 50)), Duration.ofMinutes(50));
         taskManager.addSubtask(subtask);
         return subtask;
     }
@@ -35,7 +41,7 @@ abstract public class TaskManagerTest<T extends TaskManager> {
         Epic epic = createEpic();
 
         Subtask subtask1 = createSubtask(epic.getId());
-        Subtask subtask2 = createSubtask(epic.getId());
+        Subtask subtask2 = createAnSubtask(epic.getId());
 
         assertEquals(TaskStatus.NEW, epic.getStatus(), "Статус эпика должен быть NEW");
 
@@ -106,7 +112,7 @@ abstract public class TaskManagerTest<T extends TaskManager> {
         Epic epic = createEpic();
         Subtask subtask = createSubtask(epic.getId());
 
-        assertAll(() -> assertEquals(List.of(task, epic, subtask), taskManager.getSortedTasksById(), "Список задач должен совпадать"), () -> assertEquals(List.of(task), taskManager.getTasks(), "Список задач должен совпадать"), () -> assertEquals(List.of(epic), taskManager.getEpics(), "Список задач должен совпадать"), () -> assertEquals(List.of(subtask), taskManager.getSubtasks(), "Список задач должен совпадать"), () -> assertEquals(List.of(task, epic, subtask), taskManager.getPrioritizedTasks(), "Список отсортированных по времени задач должен совпадать"));
+        assertAll(() -> assertEquals(List.of(task, epic,subtask), taskManager.getSortedTasksById(), "Список задач должен совпадать"), () -> assertEquals(List.of(task), taskManager.getTasks(), "Список задач должен совпадать"), () -> assertEquals(List.of(epic), taskManager.getEpics(), "Список задач должен совпадать"), () -> assertEquals(List.of(subtask), taskManager.getSubtasks(), "Список задач должен совпадать"), () -> assertEquals(List.of(task, subtask), taskManager.getPrioritizedTasks(), "Список отсортированных по времени задач должен совпадать"));
 
         taskManager.clearTasks();
         taskManager.clearEpics();
@@ -125,29 +131,29 @@ abstract public class TaskManagerTest<T extends TaskManager> {
         taskManager.removeTask(task.getId());
         taskManager.removeEpic(epic.getId());
         taskManager.removeSubtask(subtask.getId());
-
-        assertAll(() -> assertNull(taskManager.getTask(task.getId()), "Задача должна быть удалена"), () -> assertNull(taskManager.getEpic(epic.getId()), "Эпик должен быть удален"), () -> assertNull(taskManager.getSubtask(subtask.getId()), "Подзадача должна быть удалена"));
+        assertThrows(NotFoundException.class, () -> taskManager.getTask(task.getId()), "должно выбрасываться исключение при получении задачи");
+        assertThrows(NotFoundException.class,() ->taskManager.getEpic(epic.getId()), "должно выбрасываться исключение при получении эпика");
+        assertThrows(NotFoundException.class,() ->taskManager.getSubtask(subtask.getId()), "должно выбрасываться исключение при получении подзадачи");
     }
 
     @Test
     @DisplayName("должен проверить пересечение задач")
     void shouldCheckTaskCollisions() {
         Task task = new Task("Task 1", "Description 1", LocalDateTime.of(LocalDate.now(), LocalTime.of(10, 10)), Duration.ofMinutes(50));
-        taskManager.addTask(task);
+        assertDoesNotThrow(() -> taskManager.addTask(task), "не должно выбрасываться исключение при добавлении задачи");
+
         Epic epic = new Epic("Epic 1", "Description 1");
-        taskManager.addEpic(epic);
+        assertDoesNotThrow(() -> taskManager.addEpic(epic), "не должно выбрасываться исключение при добавлении задачи");
+
         Subtask subtask = new Subtask("Subtask 1", "Description 1", epic.getId(), LocalDateTime.of(LocalDate.now(), LocalTime.of(11, 0)), Duration.ofMinutes(50));
-        taskManager.addSubtask(subtask);
-        Subtask subtask1 = new Subtask("Subtask 1", "Description 1", epic.getId());
-        taskManager.addSubtask(subtask1);
+        assertDoesNotThrow(() -> taskManager.addSubtask(subtask), "не должно выбрасываться исключение при добавлении задачи");
+
+        Subtask subtask1 = new Subtask("Subtask 2", "Description 2", epic.getId(), LocalDateTime.of(LocalDate.now(), LocalTime.of(11, 0)), Duration.ofMinutes(50));
+        assertThrows(InteractedException.class,() -> taskManager.addSubtask(subtask1), "должно выбрасываться исключение при добавлении задачи");
 
         assertTrue(taskManager.getPrioritizedTasks().contains(task), "Задача должна находиться в списке");
         assertTrue(taskManager.getPrioritizedTasks().contains(subtask), "Задача должна находиться в списке");
-
         assertFalse(taskManager.getPrioritizedTasks().contains(epic), "Задача не должна находиться в списке");
         assertFalse(taskManager.getPrioritizedTasks().contains(subtask1), "Задача не должна находиться в списке");
-
     }
-
 }
-
